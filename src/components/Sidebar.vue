@@ -28,11 +28,11 @@ const btnActive = "bg-orange-50 text-[#f37021] font-bold shadow-sm"
       <div>
         <p v-if="!recolhida" class="text-[10px] font-bold text-gray-400 uppercase px-3 py-2 tracking-widest text-center lg:text-left">Menu</p>
         
-        <!-- <button @click="$emit('changeView', 'dashboard')" 
+        <button @click="$emit('changeView', 'dashboard')" 
           :class="[baseBtn, btnNormal, recolhida ? 'lg:justify-center px-3 lg:px-0' : 'px-3 justify-start']">
           <LayoutDashboard class="w-5 h-5 shrink-0" :class="!recolhida ? 'mr-3' : 'lg:mr-0 mr-3'"/> 
           <span :class="recolhida ? 'lg:hidden block' : 'block'" class="text-sm">Dashboard</span>
-        </button> -->
+        </button>
 
         <button @click="$emit('changeView', 'garantias')" 
           :class="[baseBtn, btnActive, recolhida ? 'lg:justify-center px-3 lg:px-0' : 'px-3 justify-start']">
@@ -41,7 +41,7 @@ const btnActive = "bg-orange-50 text-[#f37021] font-bold shadow-sm"
         </button>
       </div>
 
-      <!-- <div class="pt-4">
+      <div class="pt-4">
         <p v-if="!recolhida" class="text-[10px] font-bold text-gray-400 uppercase px-3 py-2 tracking-widest text-center lg:text-left">Ferramentas</p>
         <button :class="[baseBtn, btnNormal, recolhida ? 'lg:justify-center px-3 lg:px-0' : 'px-3 justify-start']">
           <Wrench class="w-5 h-5 shrink-0" :class="!recolhida ? 'mr-3' : 'lg:mr-0 mr-3'"/> 
@@ -55,15 +55,15 @@ const btnActive = "bg-orange-50 text-[#f37021] font-bold shadow-sm"
           <Settings class="w-5 h-5 shrink-0" :class="!recolhida ? 'mr-3' : 'lg:mr-0 mr-3'"/> 
           <span :class="recolhida ? 'lg:hidden block' : 'block'" class="text-sm">Ajustes</span>
         </button>
-      </div> -->
+      </div>
     </nav>
 
     <!-- Rodapé -->
     <div class="p-4 border-t border-gray-100 space-y-1">
-      <!-- <button :class="[baseBtn, 'text-gray-500 hover:text-orange-500', recolhida ? 'lg:justify-center px-3 lg:px-0' : 'px-3 justify-start']">
+      <button :class="[baseBtn, 'text-gray-500 hover:text-orange-500', recolhida ? 'lg:justify-center px-3 lg:px-0' : 'px-3 justify-start']">
         <HelpCircle class="w-5 h-5 shrink-0" :class="!recolhida ? 'mr-3' : 'lg:mr-0 mr-3'"/> 
         <span :class="recolhida ? 'lg:hidden block' : 'block'" class="text-sm font-medium">Ajuda</span>
-      </button> -->
+      </button>
       
       <button @click="$emit('logout')" 
         :class="[baseBtn, 'text-red-500 bg-red-50 hover:bg-red-100 font-bold', recolhida ? 'lg:justify-center px-3 lg:px-0' : 'px-3 justify-start']">
