@@ -1,12 +1,16 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import axios from 'axios'
-import { Search, Eye } from 'lucide-vue-next'
+import { Search, Eye, X } from 'lucide-vue-next' // Adicionado o ícone X
 
 const props = defineProps(['itensPorPagina'])
 const dados = ref([])
 const busca = ref('')
 const paginaAtual = ref(1)
+
+// Estados para o Modal
+const modalAberto = ref(false)
+const midiaSelecionada = ref('')
 
 const fetchDados = async () => {
   try {
@@ -16,6 +20,24 @@ const fetchDados = async () => {
   } catch (error) { 
     console.error("Erro ao buscar dados:", error) 
   }
+}
+
+// Função para abrir o modal
+const abrirModal = (anexo) => {
+  midiaSelecionada.value = `https://gpsoft.net.br/garantia/${anexo}`
+  modalAberto.value = true
+}
+
+// Função para fechar o modal
+const fecharModal = () => {
+  modalAberto.value = false
+  midiaSelecionada.value = ''
+}
+
+// Função para verificar se é vídeo
+const ehVideo = (url) => {
+  const extensoesVideo = ['.mp4', '.webm', '.ogg', '.mov']
+  return extensoesVideo.some(ext => url.toLowerCase().endsWith(ext))
 }
 
 const filtrados = computed(() => {
@@ -59,7 +81,6 @@ onMounted(fetchDados)
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-gray-50 text-gray-400 uppercase text-[11px] font-bold tracking-wider border-b border-gray-100">
-            <!-- Alterado de py-4 para py-2 -->
             <th class="px-6 py-2">Protocolo</th>
             <th class="px-6 py-2">Data</th>
             <th class="px-6 py-2">Status</th>
@@ -73,7 +94,6 @@ onMounted(fetchDados)
         </thead>
         <tbody class="divide-y divide-gray-100">
           <tr v-for="item in dadosPaginados" :key="item.protocolo" class="hover:bg-gray-50 transition text-gray-700">
-            <!-- Alterado de py-4 para py-2 em todas as tds abaixo -->
             <td class="px-6 py-2 font-medium text-gray-500 text-xs">{{ item.protocolo }}</td>
             <td class="px-6 py-2 text-xs">{{ item.data_cadastro }}</td>
             <td class="px-6 py-2">
@@ -93,12 +113,12 @@ onMounted(fetchDados)
               </div>
             </td>
             <td class="px-6 py-2">
-              <a v-if="item.anexo" 
-                 :href="'https://gpsoft.net.br/garantia/' + item.anexo"
-                 target="_blank"
-                 class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition">
+              <!-- Botão Alterado para abrir o Modal em vez de link externo direto -->
+              <button v-if="item.anexo" 
+                 @click="abrirModal(item.anexo)"
+                 class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition cursor-pointer">
                 <Eye class="w-3.5 h-3.5"/>
-              </a>
+              </button>
               <span v-else class="text-gray-300 text-[9px] italic">Sem anexo</span>
             </td>
           </tr>
@@ -111,4 +131,57 @@ onMounted(fetchDados)
       </table>
     </div>
   </div>
+
+  <!-- MODAL DE VISUALIZAÇÃO -->
+  <Teleport to="body">
+    <div v-if="modalAberto" 
+         class="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 transition-all"
+         @click.self="fecharModal">
+      
+      <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[600px] md:h-[400px] flex flex-col overflow-hidden animate-in zoom-in duration-200">
+        
+        <!-- Botão Fechar (Posicionado para não ser cortado) -->
+        <button @click="fecharModal" 
+                class="absolute top-3 right-3 z-10 p-2 bg-white/90 hover:bg-red-500 hover:text-white text-gray-700 rounded-full transition shadow-lg">
+          <X class="w-5 h-5" />
+        </button>
+
+        <!-- Container da Mídia -->
+        <div class="flex-1 flex items-center justify-center bg-gray-100 overflow-hidden">
+          
+          <!-- Se for vídeo -->
+          <video v-if="ehVideo(midiaSelecionada)" 
+                 controls 
+                 autoplay
+                 class="w-full h-full object-contain">
+            <source :src="midiaSelecionada" type="video/mp4">
+            Seu navegador não suporta vídeos.
+          </video>
+
+          <!-- Se for imagem -->
+          <img v-else 
+               :src="midiaSelecionada" 
+               class="w-full h-full object-contain" 
+               alt="Visualização do anexo">
+        </div>
+
+        <!-- Footer do Modal (Opcional, para garantir espaço do player no mobile) -->
+        <div class="bg-white p-2 text-center md:hidden">
+          <button @click="fecharModal" class="text-xs font-bold uppercase text-gray-400">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
+
+<style scoped>
+/* Animação simples para o modal */
+.animate-in {
+  animation: modal-in 0.2s ease-out;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+</style>
