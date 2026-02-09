@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --color-verde-claro: #e8f5e9;
+  --color-verde-botao: #66bb6a;
+  --color-verde-texto: #2e7d32;
+}
+
+/* Configuração para o modo Dark */
+.dark {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
