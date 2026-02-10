@@ -8,7 +8,8 @@ import Dashboard from './components/Dashboard.vue'
 import Login from './components/Login.vue'
 
 const isAutenticado = ref(false)
-const viewAtual = ref('garantias')
+// Alterado para começar no 'dashboard' para combinar com o fluxo natural
+const viewAtual = ref('dashboard') 
 const datagridRef = ref(null)
 const itensPorPagina = ref(10)
 
@@ -52,35 +53,34 @@ const mudarPagina = (p) => {
       @click="toggleSidebar"
     ></div>
 
+    <!-- 1. PASSAMOS A viewAtual PARA O SIDEBAR SABER QUEM DESTACAR -->
     <Sidebar 
       :recolhida="sidebarRecolhida"
+      :viewAtiva="viewAtual"
       @changeView="v => { viewAtual = v; if(window.innerWidth < 1024) sidebarRecolhida = true }" 
       @logout="logout" 
     />
 
-    <!-- Container da Direita: Navbar + Conteúdo (Este rola!) -->
     <div class="flex-1 flex flex-col min-w-0 h-full">
       
       <Navbar @toggleSidebar="toggleSidebar" @logout="logout" />
 
-      <!-- MAIN: overflow-y-auto garante que o scroll apareça aqui -->
       <main class="flex-1 overflow-y-auto p-4 md:p-8">
         
-        <!-- CABEÇALHO AJUSTADO: flex-row mantém lado a lado no mobile -->
+        <!-- CABEÇALHO DINÂMICO CONFORME A VIEW -->
         <div class="flex flex-row justify-between items-center mb-6 gap-2">
           
-          <!-- Lado Esquerdo: Títulos -->
           <div class="flex flex-col">
              <h2 class="text-base md:text-xl font-black text-slate-800 uppercase tracking-tighter leading-tight">
-               Garantias
+               {{ viewAtual === 'dashboard' ? 'Dashboard de Performance' : 'Garantias' }}
              </h2>
              <p class="text-[8px] md:text-[10px] text-gray-400 font-bold uppercase tracking-tight">
-               Bloco Optical 2024
+               {{ viewAtual === 'dashboard' ? 'Análise de dados geral' : 'Bloco Optical 2024' }}
              </p>
           </div>
 
-          <!-- Lado Direito: Select (Sem w-full para não quebrar linha) -->
-          <div class="flex-shrink-0">
+          <!-- Select só aparece se estiver na lista de garantias -->
+          <div v-if="viewAtual === 'garantias'" class="flex-shrink-0">
             <select 
               v-model.number="itensPorPagina" 
               class="text-[9px] md:text-[10px] font-black p-1.5 md:p-2 rounded border border-gray-200 bg-white shadow-sm outline-none focus:border-orange-500"
@@ -94,9 +94,10 @@ const mudarPagina = (p) => {
           
         </div>
 
+        <!-- Troca de Componentes -->
         <Dashboard v-if="viewAtual === 'dashboard'" />
 
-        <div v-else class="space-y-4 pb-10">
+        <div v-else-if="viewAtual === 'garantias'" class="space-y-4 pb-10">
           <GarantiaList ref="datagridRef" :itensPorPagina="itensPorPagina" />
           
           <Footer 
@@ -110,29 +111,3 @@ const mudarPagina = (p) => {
     </div>
   </div>
 </template>
-
-<style>
-/* Remove o travamento do scroll do body e deixa a cargo do container interno */
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden; /* O body não rola, o main sim */
-  font-family: 'Inter', sans-serif;
-}
-
-/* Scrollbar visível e elegante */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #f37021; /* Cor laranja ao passar o mouse */
-}
-</style>
