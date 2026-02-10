@@ -54,7 +54,7 @@ const realizarLogin = () => {
         <div class="p-8 pb-4 text-center">
           <img :src="logoUrl" alt="Logo" class="h-16 mx-auto mb-4 object-contain">
           <h2 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Acesso Restrito</h2>
-          <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Ambiente de Testes</p>
+          <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Imagens Bloco Optico - Garantia 2024</p>
         </div>
 
         <!-- Formulário -->
