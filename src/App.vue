@@ -7,97 +7,98 @@ import Footer from './components/Footer.vue'
 import Dashboard from './components/Dashboard.vue'
 import Login from './components/Login.vue'
 
-// --- ESTADOS DE AUTENTICAÇÃO ---
 const isAutenticado = ref(false)
-
-// --- ESTADOS DA TABELA E NAVEGAÇÃO ---
 const viewAtual = ref('garantias')
 const datagridRef = ref(null)
 const itensPorPagina = ref(10)
 
-// Verifica se o usuário já estava logado ao carregar/atualizar a página
-onMounted(() => {
-  const logado = localStorage.getItem('autenticado')
-  if (logado === 'true') {
-    isAutenticado.value = true
-  }
-})
+// Sidebar começa fechada no mobile e aberta no desktop
+const sidebarRecolhida = ref(window.innerWidth < 1024)
 
-// Função chamada quando o Login.vue emite sucesso
-const handleLoginSucesso = () => {
-  isAutenticado.value = true
+const toggleSidebar = () => {
+  sidebarRecolhida.value = !sidebarRecolhida.value
 }
 
-// Função de Logout (Limpa o acesso e volta para a tela de login)
+onMounted(() => {
+  const logado = localStorage.getItem('autenticado')
+  if (logado === 'true') isAutenticado.value = true
+  
+  window.addEventListener('resize', () => {
+    if (window.innerWidth < 1024) sidebarRecolhida.value = true
+  })
+})
+
+const handleLoginSucesso = () => isAutenticado.value = true
+
 const logout = () => {
   localStorage.removeItem('autenticado')
   isAutenticado.value = false
-  // Resetamos para a view inicial para o próximo login
-  viewAtual.value = 'garantias' 
 }
 
-// Função para controlar a paginação do componente filho (GarantiaList)
 const mudarPagina = (p) => { 
-  if (datagridRef.value) {
-    datagridRef.value.paginaAtual = p 
-  }
+  if (datagridRef.value) datagridRef.value.paginaAtual = p 
 }
 </script>
 
 <template>
-  <!-- TELA DE LOGIN: Aparece se não estiver autenticado -->
   <Login v-if="!isAutenticado" @login-sucesso="handleLoginSucesso" />
 
-  <!-- SISTEMA PRINCIPAL: Só renderiza se estiver autenticado -->
-  <div v-else class="flex min-h-screen bg-[#f8f9fa] transition-colors duration-300">
+  <div v-else class="flex h-screen bg-[#f8f9fa] overflow-hidden">
     
-    <!-- SIDEBAR: Adicionado o ouvinte @logout para disparar a função logout -->
+    <!-- Overlay Mobile -->
+    <div 
+      v-if="!sidebarRecolhida" 
+      class="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300"
+      @click="toggleSidebar"
+    ></div>
+
     <Sidebar 
-      @changeView="v => viewAtual = v" 
+      :recolhida="sidebarRecolhida"
+      @changeView="v => { viewAtual = v; if(window.innerWidth < 1024) sidebarRecolhida = true }" 
       @logout="logout" 
     />
 
-    <div class="flex-1 flex flex-col">
-      <!-- NAVBAR: Também mantém o logout caso haja botão lá -->
-      <Navbar @logout="logout" />
+    <!-- Container da Direita: Navbar + Conteúdo (Este rola!) -->
+    <div class="flex-1 flex flex-col min-w-0 h-full">
+      
+      <Navbar @toggleSidebar="toggleSidebar" @logout="logout" />
 
-      <main class="p-8">
-        <!-- CABEÇALHO DA PÁGINA -->
-        <div class="flex justify-between items-center mb-6">
+      <!-- MAIN: overflow-y-auto garante que o scroll apareça aqui -->
+      <main class="flex-1 overflow-y-auto p-4 md:p-8">
+        
+        <!-- CABEÇALHO AJUSTADO: flex-row mantém lado a lado no mobile -->
+        <div class="flex flex-row justify-between items-center mb-6 gap-2">
+          
+          <!-- Lado Esquerdo: Títulos -->
           <div class="flex flex-col">
-             <h2 class="text-xl font-black text-slate-800 uppercase tracking-tighter">
-               Gestão de Garantias
+             <h2 class="text-base md:text-xl font-black text-slate-800 uppercase tracking-tighter leading-tight">
+               Garantias
              </h2>
-             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-tight">
-               Fila de processos concluídos (Garantia System)
+             <p class="text-[8px] md:text-[10px] text-gray-400 font-bold uppercase tracking-tight">
+               Bloco Optical 2024
              </p>
           </div>
-          
-          <!-- SELETOR DE QUANTIDADE POR PÁGINA -->
-          <div class="mb-4 flex justify-end">
+
+          <!-- Lado Direito: Select (Sem w-full para não quebrar linha) -->
+          <div class="flex-shrink-0">
             <select 
-                v-model.number="itensPorPagina" 
-                class="text-[10px] font-black p-2 rounded border border-gray-200 bg-white outline-none focus:border-orange-500"
-              >
+              v-model.number="itensPorPagina" 
+              class="text-[9px] md:text-[10px] font-black p-1.5 md:p-2 rounded border border-gray-200 bg-white shadow-sm outline-none focus:border-orange-500"
+            >
               <option :value="10">Exibir 10</option>
               <option :value="50">Exibir 50</option>
               <option :value="100">Exibir 100</option>
-              <option :value="100000">Todos os registros</option>
+              <option :value="100000">Todos</option>
             </select>
           </div>
+          
         </div>
 
-        <!-- CONTEÚDO DINÂMICO (DASHBOARD OU LISTA) -->
         <Dashboard v-if="viewAtual === 'dashboard'" />
 
-        <div v-else>
-          <!-- LISTAGEM DE DADOS -->
-          <GarantiaList 
-            ref="datagridRef" 
-            :itensPorPagina="itensPorPagina" 
-          />
+        <div v-else class="space-y-4 pb-10">
+          <GarantiaList ref="datagridRef" :itensPorPagina="itensPorPagina" />
           
-          <!-- RODAPÉ COM PAGINAÇÃO NUMÉRICA -->
           <Footer 
             v-if="datagridRef && datagridRef.filtrados"
             :paginaAtual="datagridRef.paginaAtual"
@@ -111,9 +112,27 @@ const mudarPagina = (p) => {
 </template>
 
 <style>
-/* Estilos globais se necessário */
-body {
+/* Remove o travamento do scroll do body e deixa a cargo do container interno */
+html, body {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* O body não rola, o main sim */
   font-family: 'Inter', sans-serif;
+}
+
+/* Scrollbar visível e elegante */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f37021; /* Cor laranja ao passar o mouse */
 }
 </style>
