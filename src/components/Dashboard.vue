@@ -168,7 +168,7 @@ onMounted(async () => {
         <div class="bg-white p-6 rounded-xl border border-emerald-100 shadow-sm">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Itens Concluídos</p>
+              <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Total de Garantias</p>
               <h3 class="text-2xl font-bold text-emerald-600">{{ totalConcluidos }}</h3>
             </div>
             <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
